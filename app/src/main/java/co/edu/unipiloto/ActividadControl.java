@@ -25,12 +25,12 @@ public class ActividadControl extends AppCompatActivity {
         Respuesta = findViewById(R.id.Respuesta);
         Responder = findViewById(R.id.Contestar);
 
-        SharedPreferences sharedPreferences = getSharedPreferences("chatHistory", MODE_PRIVATE);
-        String chatHistory = sharedPreferences.getString("history", "");
+        SharedPreferences sharedPreferences = getSharedPreferences("Historial", MODE_PRIVATE);
+        String chatHistory = sharedPreferences.getString("historial", "");
         Historial.setText(chatHistory);
 
         Intent intent = getIntent();
-        String messageFromOwner = intent.getStringExtra("message");
+        String messageFromOwner = intent.getStringExtra("mensaje");
 
         if (messageFromOwner != null && !chatHistory.contains("Propietario: " + messageFromOwner)) {
             Historial.append("\nPropietario: " + messageFromOwner);
@@ -44,11 +44,11 @@ public class ActividadControl extends AppCompatActivity {
                 Historial.setText(updatedHistory);
 
                 SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putString("history", updatedHistory);
+                editor.putString("historial", updatedHistory);
                 editor.apply();
 
                 Intent intentBack = new Intent(ActividadControl.this, ActividadPrincipal.class);
-                intentBack.putExtra("responseMessage", responseMessage);
+                intentBack.putExtra("mensajeRespuesta", responseMessage);
                 startActivity(intentBack);
             } else {
                 Toast.makeText(ActividadControl.this, "Esperando respuesta...", Toast.LENGTH_SHORT).show();
