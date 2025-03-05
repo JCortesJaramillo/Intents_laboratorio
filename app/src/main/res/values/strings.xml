@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Intents</string>
+    <string name="mensaje_hint">Escribir mensaje aquí</string>
+    <string name="boton_enviar">Enviar</string>
+    <string name="historial_mensajes">Historial</string>
+    <string name="historial">Historial</string>
+    <string name="respuesta">Responder</string>
+    <string name="contestar">Contestar</string>
+
+</resources>
