@@ -7,7 +7,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.appcompat.app.AppCompatActivity;
 
 public class ActividadControl extends AppCompatActivity {
@@ -15,6 +14,7 @@ public class ActividadControl extends AppCompatActivity {
     private TextView Historial;
     private EditText Respuesta;
     private Button Responder;
+    private SharedPreferences sharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,34 +25,46 @@ public class ActividadControl extends AppCompatActivity {
         Respuesta = findViewById(R.id.Respuesta);
         Responder = findViewById(R.id.Contestar);
 
-        SharedPreferences sharedPreferences = getSharedPreferences("Historial", MODE_PRIVATE);
-        String chatHistory = sharedPreferences.getString("historial", "");
-        Historial.setText(chatHistory);
+        sharedPreferences = getSharedPreferences("chatData", MODE_PRIVATE);
+        cargarHistorial();
 
         Intent intent = getIntent();
-        String messageFromOwner = intent.getStringExtra("mensaje");
+        String messageFromOwner = intent.getStringExtra("chatHistory"); // Recibe historial completo
 
-        if (messageFromOwner != null && !chatHistory.contains("Propietario: " + messageFromOwner)) {
-            Historial.append("\nPropietario: " + messageFromOwner);
+        if (messageFromOwner != null) {
+            Historial.setText(messageFromOwner);
         }
 
-        Responder.setOnClickListener(v -> {
-            String responseMessage = Respuesta.getText().toString();
-            if (!responseMessage.isEmpty()) {
-                String updatedHistory = chatHistory + "\nCuidador: " + responseMessage;
+        Responder.setOnClickListener(v -> enviarRespuesta());
+    }
 
-                Historial.setText(updatedHistory);
+    private void cargarHistorial() {
+        String chatHistory = sharedPreferences.getString("historial", "");
+        Historial.setText(chatHistory);
+    }
 
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putString("historial", updatedHistory);
-                editor.apply();
+    private void enviarRespuesta() {
+        String responseMessage = Respuesta.getText().toString().trim();
 
-                Intent intentBack = new Intent(ActividadControl.this, ActividadPrincipal.class);
-                intentBack.putExtra("mensajeRespuesta", responseMessage);
-                startActivity(intentBack);
-            } else {
-                Toast.makeText(ActividadControl.this, "Esperando respuesta...", Toast.LENGTH_SHORT).show();
-            }
-        });
+        if (!responseMessage.isEmpty()) {
+            String chatHistory = sharedPreferences.getString("historial", "");
+            String updatedHistory = chatHistory.isEmpty() ? "Cuidador: " + responseMessage
+                    : chatHistory + "\nCuidador: " + responseMessage;
+
+            Historial.setText(updatedHistory);
+
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putString("historial", updatedHistory);
+            editor.apply();
+
+            Respuesta.setText("");
+
+            Intent intentBack = new Intent(ActividadControl.this, ActividadPrincipal.class);
+            intentBack.putExtra("chatHistory", updatedHistory);
+            startActivity(intentBack);
+        } else {
+            Toast.makeText(ActividadControl.this, "Esperando respuesta...", Toast.LENGTH_SHORT).show();
+        }
     }
 }
+

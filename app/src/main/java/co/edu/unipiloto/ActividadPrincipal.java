@@ -14,6 +14,7 @@ public class ActividadPrincipal extends AppCompatActivity {
     private EditText Mensaje;
     private TextView Historial;
     private Button BotonEnviar;
+    private SharedPreferences sharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,28 +25,38 @@ public class ActividadPrincipal extends AppCompatActivity {
         Historial = findViewById(R.id.Historial);
         BotonEnviar = findViewById(R.id.BotonEnviar);
 
-        SharedPreferences sharedPreferences = getSharedPreferences("chatHistory", MODE_PRIVATE);
-        String chatHistory = sharedPreferences.getString("history", "");
+        sharedPreferences = getSharedPreferences("chatData", MODE_PRIVATE);
+        cargarHistorial();
+
+        BotonEnviar.setOnClickListener(v -> enviarMensaje());
+    }
+
+    private void cargarHistorial() {
+        String chatHistory = sharedPreferences.getString("historial", "");
         Historial.setText(chatHistory);
+    }
 
-        BotonEnviar.setOnClickListener(v -> {
-            String message = Mensaje.getText().toString();
+    private void enviarMensaje() {
+        String message = Mensaje.getText().toString().trim();
 
-            if (!message.isEmpty()) {
-                String updatedHistory = chatHistory + "\nPropietario: " + message;
+        if (!message.isEmpty()) {
+            String chatHistory = sharedPreferences.getString("historial", "");
+            String updatedHistory = chatHistory.isEmpty() ? "Propietario: " + message
+                    : chatHistory + "\nPropietario: " + message;
 
-                Historial.setText(updatedHistory);
+            Historial.setText(updatedHistory);
 
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putString("history", updatedHistory);
-                editor.apply();
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putString("historial", updatedHistory);
+            editor.apply();
 
-                Intent intentToCaregiver = new Intent(ActividadPrincipal.this, ActividadControl.class);
-                intentToCaregiver.putExtra("message", message);
-                startActivity(intentToCaregiver);
-            } else {
-                Toast.makeText(ActividadPrincipal.this, "Por favor, escribe un mensaje.", Toast.LENGTH_SHORT).show();
-            }
-        });
+            Mensaje.setText("");
+
+            Intent intentToCaregiver = new Intent(ActividadPrincipal.this, ActividadControl.class);
+            intentToCaregiver.putExtra("chatHistory", updatedHistory);
+            startActivity(intentToCaregiver);
+        } else {
+            Toast.makeText(ActividadPrincipal.this, "Por favor, escribe un mensaje.", Toast.LENGTH_SHORT).show();
+        }
     }
 }
